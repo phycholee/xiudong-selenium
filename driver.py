@@ -54,7 +54,6 @@ def goto_login_url(driver: webdriver.Chrome):
 def goto_confirm_url(driver, confirm_ticket_url):
     driver.get(confirm_ticket_url)
 
-    select_user(driver)
     payBtn = WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, '.payBtn')))
 
@@ -70,18 +69,23 @@ def goto_confirm_url(driver, confirm_ticket_url):
         return goto_confirm_url(driver, confirm_ticket_url)
 
 
-def confirm_ticket(payBtn):
+def confirm_ticket(payBtn, driver):
+    select_user(driver)
+    needEmail = True
     b = payBtn
-    while True:
+    i = 0
+    while i < 1000:
         try:
             b.click()  # click 本身会占用时间，不 sleep 了
             # time.sleep(interval)
 
             # 发送邮件通知
-            content = '也有可能没抢到，反正打开秀动看看吧...'
-            subject = '抢到啦，快看看手机吧'
-            receivers = ['xxx@qq.com']
-            sendMail(subject, content, receivers)
+            if needEmail:
+                needEmail = False
+                content = '也有可能没抢到，反正打开秀动看看吧...'
+                subject = '抢到啦，快看看手机吧'
+                receivers = ['phycholee@qq.com']
+                sendMail(subject, content, receivers)
         except ElementClickInterceptedException as e:
             print(f'点击支付按钮发生异常，可能是已经抢票成功, 请查看手机 但是先不要退出 {e}')
             continue
@@ -113,7 +117,7 @@ def create_instance(chrome_driver, ticketId: str, event: str, ticketNum: str, st
 
     if start_time is None:  # 直接抢
         print(f'开始抢票')
-        confirm_ticket(pay_btn)
+        confirm_ticket(pay_btn, chrome_driver)
     else:
         # 处理时间
         # start_time = "2021 07 19 20 00 00"
@@ -124,7 +128,7 @@ def create_instance(chrome_driver, ticketId: str, event: str, ticketNum: str, st
             time.sleep(0.001)  # 休眠一下防止 cpu 占用飙升
 
         print(f'开始抢票')
-        confirm_ticket(pay_btn)
+        confirm_ticket(pay_btn, chrome_driver)
 
     # quit(chrome_driver) 抢不到也不要自己退出 手动抢
 

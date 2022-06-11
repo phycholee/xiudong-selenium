@@ -51,37 +51,41 @@ def goto_login_url(driver: webdriver.Chrome):
     return
 
 
-def goto_confirm_url(driver, confirm_ticket_url):
+# 获取支付按钮，
+def get_pay_btn(driver, confirm_ticket_url):
     driver.get(confirm_ticket_url)
 
     payBtn = WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, '.payBtn')))
-
-    # DONE: 如果不是立即支付，需要进行刷新
-    # payBtn <selenium.webdriver.remote.webelement.WebElement
-    # (session="1244164329c3e2743132313082fd0416", element="36634b86-15bf-45a2-90d8-db69c3e60f6e")>
-    # print(f'点击按钮的文字', payBtn.text)  # 已售罄/ 立即支付 ¥160.00
-    if '立即支付' in payBtn.text:
-        return payBtn
-    else:
-        # 不断刷新
-        time.sleep(0.001)
-        return goto_confirm_url(driver, confirm_ticket_url)
+    return payBtn
 
 
-def confirm_ticket(payBtn, driver):
+# DONE: 如果不是立即支付，需要进行刷新
+# payBtn <selenium.webdriver.remote.webelement.WebElement
+# (session="1244164329c3e2743132313082fd0416", element="36634b86-15bf-45a2-90d8-db69c3e60f6e")>
+# print(f'点击按钮的文字', payBtn.text)  # 已售罄/ 立即支付 ¥160.00
+
+# 使用while循环，而不用递归，递归层级深了会自动停止
+def goto_confirm_url(driver, confirm_ticket_url):
+    while True:
+        payBtn = get_pay_btn(driver, confirm_ticket_url)
+        if '立即支付' in payBtn.text:
+            return payBtn
+        else:
+            time.sleep(0.001)
+
+# 下单
+def confirm_ticket(payBtn, driver, confirm_ticket_url):
     select_user(driver)
-    needEmail = True
     b = payBtn
     i = 0
     while i < 1000:
         try:
             b.click()  # click 本身会占用时间，不 sleep 了
-            # time.sleep(interval)
+            i += 1
 
-            # 发送邮件通知
-            if needEmail:
-                needEmail = False
+            # 发送邮件通知，先点击几次再通知
+            if i == 50:
                 content = '也有可能没抢到，反正打开秀动看看吧...'
                 subject = '抢到啦，快看看手机吧'
                 receivers = ['phycholee@qq.com']
@@ -96,7 +100,8 @@ def confirm_ticket(payBtn, driver):
             print(f'errmsg is {errmsg}')
 
             return
-
+    # 九成是没抢到，继续刷新
+    goto_confirm_url(driver, confirm_ticket_url)
 
 def quit_driver(driver):
     try:
@@ -117,7 +122,7 @@ def create_instance(chrome_driver, ticketId: str, event: str, ticketNum: str, st
 
     if start_time is None:  # 直接抢
         print(f'开始抢票')
-        confirm_ticket(pay_btn, chrome_driver)
+        confirm_ticket(pay_btn, chrome_driver, confirm_url)
     else:
         # 处理时间
         # start_time = "2021 07 19 20 00 00"
@@ -125,10 +130,10 @@ def create_instance(chrome_driver, ticketId: str, event: str, ticketNum: str, st
         while True:
             if t1 - time.time() < float(wait_time):
                 break
-            time.sleep(0.001)  # 休眠一下防止 cpu 占用飙升
+            time.sleep(0.001)        # 休眠一下防止 cpu 占用飙升
 
         print(f'开始抢票')
-        confirm_ticket(pay_btn, chrome_driver)
+        confirm_ticket(pay_btn, chrome_driver, confirm_url)
 
     # quit(chrome_driver) 抢不到也不要自己退出 手动抢
 

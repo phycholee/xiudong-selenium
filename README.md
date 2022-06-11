@@ -1,36 +1,52 @@
 ### xiudong-selenium
 
-> 此版本为 selenium 模拟浏览器操作 目前暂时不考虑继续维护。
+> 此版本为 https://github.com/ronething/xiudong-selenium 的fork版本
 
-试试能不能抢到椅子乐团演出票
+原版本只设计在到点下单是抢票，但没有针对捡漏场景，同时加上了自动选择观演人和邮件通知。
 
-#### usage
+新功能和优化：
 
-chromedriver 程序需要下载一下
+1. 加上了自动选择观演人，但没有针对**普通票**和需要**选择观演人的票**进行自动兼容，所以需要手动加入或注释select_user来兼容两种场景
+2. 加入了发送邮件通知，只能通知点击**立即支付**成功了，并不能知道是否抢成功了
+3. 优化了递归导致内存溢出自动停止的bug
+4. 热门票捡漏大概率不成功，点击**立即支付**1000次后，再次刷新页面重新抢（**立即支付**接口服务端有几秒的限流时间），保证不用人工介入，但退出需要人工退出，即时抢到了
+
+#### 使用方法
+
+1. chromedriver 程序需要下载一下，放在项目根目录下
 
 https://chromedriver.chromium.org/downloads
 
+2. 下载必要的依赖
 ```
 git clone https://github.com/ronething/xiudong-selenium.git
 pip3 install -r req.txt
 python3 main.py
 ```
 
+3. 打开页面
+
 提供了两个 api
 
-- 一个是跳转到登录页面，请自行登录 `/login`
-- 一个是通用购买演出票 api，请自行传入对应参数, 支持定时功能 `/buy?event=xxx&ticketId=xxx&cron_time=xxx`
+- 一个是跳转到登录页面，请自行登录 `http://127.0.0.1:9997/login`
+- 一个是通用购买演出票 api，请自行传入对应参数, 支持定时功能 `http://127.0.0.1:9997/buy?event=xxx&ticketId=xxx&cron_time=xxx`
 
 - 如果多次刷新 login 且登录页面没有进行登录，可能会存在线程阻塞问题，因为 max_workers 设置了 10 个, 暂时可以通过关闭窗口解决
 - 如果确认订单页面显示已售罄，需要不断刷新直到出现立即支付，这一点在捡漏的时候很有用
 - 只是给大家提供点思路，其他请自行阅读代码，祝大家好运
 - **注意：** 有问题请先看 [issue](https://github.com/ronething/xiudong-selenium/issues)，没有则新开 issue 提问即可
 
-### 成功截图
+### 怎么找到event和ticketId
 
-昨晚抢到了。不错。
+在秀动web页面打开对应的演唱会，如：www.showstart.com/event/175825
 
-![](./img/chairs.png)
+175825就是event
+
+F12搜索html代码，搜索tickets，会找到如下的json数据，id就是ticketId
+
+```
+[{id:"7d9c8ffdfa016adbca6508367b45f8ef",ticketName:"早鸟票",originalPrice:d,sellPrice:1800000,validateType:e,startTime:l,endTime:m,instruction:h,status:b,isThroughTicket:b,sessionIds:i,isAddGoods:a,isHideStartDate:b,accountLimitNum:a,certificateLimitNum:a,memberNum:a,realName:a,buyType:c,realNameValidType:a,ticketType:a,pickupTime:j,groupId:a,sellPriceStr:"180",originalPriceStr:f},{id:"d5a82aeb7a8c8fb8579f343e339c32b6",ticketName:"预售票",originalPrice:d,sellPrice:2200000,validateType:e,startTime:l,endTime:m,instruction:h,status:b,isThroughTicket:b,sessionIds:i,isAddGoods:a,isHideStartDate:b,accountLimitNum:c,certificateLimitNum:a,memberNum:a,realName:a,buyType:c,realNameValidType:a,ticketType:a,pickupTime:j,groupId:a,sellPriceStr:"220",originalPriceStr:f},{id:"929878a73a220699e1ae7638cf482fd2",ticketName:"全价票",originalPrice:d,sellPrice:d,validateType:e,startTime:"2022-06-06 20:01:00",endTime:"2022-06-11 21:00:00",instruction:h,status:b,isThroughTicket:b,sessionIds:i,isAddGoods:a,isHideStartDate:b,accountLimitNum:c,certificateLimitNum:a,memberNum:a,realName:a,buyType:c,realNameValidType:a,ticketType:a,pickupTime:j,groupId:a,sellPriceStr:f,originalPriceStr:f}]
+```
 
 ### 免责声明
 
@@ -55,15 +71,6 @@ python3 main.py
 
 > 您使用或者复制了本仓库且本人制作的任何代码或项目，则视为已接受此声明，请仔细阅读
 您在本声明未发出之时点使用或者复制了本仓库且本人制作的任何代码或项目且此时还在使用，则视为已接受此声明，请仔细阅读
-
-### TODO
-
-- [x] driver 包装成 web 服务, 这样就可以不用重启了(便于对别人下单后15分钟的取消订单进行捡漏)
-- [ ] driver 多窗口操作
-
-### Star History
-
-![Star History Chart](https://api.star-history.com/svg?repos=ronething/xiudong-selenium&type=Date)
 
 ### acknowledgement
 

@@ -1,9 +1,0 @@
-11号
-http://127.0.0.1:9997/buy?event=175825&ticketId=7d9c8ffdfa016adbca6508367b45f8ef&ticketNum=1
-http://127.0.0.1:9997/buy?event=175825&ticketId=d5a82aeb7a8c8fb8579f343e339c32b6&ticketNum=1
-http://127.0.0.1:9997/buy?event=175825&ticketId=929878a73a220699e1ae7638cf482fd2&ticketNum=1
-
-10号
-http://127.0.0.1:9997/buy?event=175824&ticketId=4f93ba2995060a38f05e28a00027a470&ticketNum=1
-http://127.0.0.1:9997/buy?event=175824&ticketId=201708199e2284568d70caf923cb46f1&ticketNum=1
-http://127.0.0.1:9997/buy?event=175824&ticketId=ec89c34980633bbd06cef95030b27845&ticketNum=1

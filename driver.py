@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from sendEmail import sendMail
 
-wait_time = 3  # 提前三秒开始抢
+wait_time = 0  # 提前三秒开始抢
 
 
 def load_driver():
@@ -76,20 +76,24 @@ def goto_confirm_url(driver, confirm_ticket_url):
 
 # 下单
 def confirm_ticket(payBtn, driver, confirm_ticket_url):
-    select_user(driver)
+    # select_user(driver)
     b = payBtn
     i = 0
     while i < 1000:
         try:
             b.click()  # click 本身会占用时间，不 sleep 了
+            print(f'b.click()')
             i += 1
 
+            # 秀动限流措施加强了，第一次没抢到，要限流10秒以上，基本只能捡漏了
+            time.sleep(1)
+
             # 发送邮件通知，先点击几次再通知
-            if i == 50:
-                content = '也有可能没抢到，反正打开秀动看看吧...'
-                subject = '抢到啦，快看看手机吧'
-                receivers = ['phycholee@qq.com']
-                sendMail(subject, content, receivers)
+            # if i == 50:
+            #     content = '也有可能没抢到，反正打开秀动看看吧...'
+            #     subject = '抢到啦，快看看手机吧'
+            #     receivers = ['phycholee@qq.com']
+            #     sendMail(subject, content, receivers)
         except ElementClickInterceptedException as e:
             print(f'点击支付按钮发生异常，可能是已经抢票成功, 请查看手机 但是先不要退出 {e}')
             continue
